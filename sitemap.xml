@@ -3,19 +3,11 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>wiwh.github.io/</loc>
-  </url>
-  
-  <url>
     <loc>wiwh.github.io/authors/</loc>
   </url>
   
   <url>
     <loc>wiwh.github.io/categories/</loc>
-  </url>
-  
-  <url>
-    <loc>wiwh.github.io/author/nelson-bighetti/</loc>
   </url>
   
   <url>
@@ -36,6 +28,14 @@
   
   <url>
     <loc>wiwh.github.io/tags/</loc>
+  </url>
+  
+  <url>
+    <loc>wiwh.github.io/author/william-white/</loc>
+  </url>
+  
+  <url>
+    <loc>wiwh.github.io/</loc>
   </url>
   
 </urlset>
