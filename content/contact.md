@@ -2,4 +2,5 @@
 title: About
 hide_footer: false
 ---
-This is the why and the how of the website.
+
+Write me: wiwh404@gmail.com.
