@@ -3,7 +3,7 @@ project:
   output-dir: docs
 
 website:
-  title: "website"
+  title: "Guillaume Blanc"
   navbar:
     background: "primary"
     search: true
@@ -11,6 +11,8 @@ website:
       - href: index.qmd
         text: Home
       - blog.qmd
+      - href: latent_book/_book/index.html
+        text: Book
       - about.qmd
 
 
