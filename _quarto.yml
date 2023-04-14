@@ -5,10 +5,14 @@ project:
 website:
   title: "website"
   navbar:
+    background: "primary"
+    search: true
     left:
       - href: index.qmd
         text: Home
+      - blog.qmd
       - about.qmd
+
 
 format:
   html:
