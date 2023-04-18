@@ -68,5 +68,12 @@
     "title": "Projects",
     "section": "",
     "text": "Here will be my various data-science projects"
+  },
+  {
+    "objectID": "latent-book.html",
+    "href": "latent-book.html",
+    "title": "Unobservable",
+    "section": "",
+    "text": "Unobservable: latent variable models for multivariate data. Freely accessible here."
   }
 ]

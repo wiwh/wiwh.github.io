@@ -1,0 +1,6 @@
+---
+title: "Unobservable"
+---
+
+Unobservable: latent variable models for multivariate data.
+Freely accessible [here](wiwh.quarto.pub/unobservable).

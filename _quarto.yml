@@ -11,7 +11,7 @@ website:
       - href: index.qmd
         text: Home
       - blog.qmd
-      - href: latent_book/_book/index.html
+      - href: latent-book.qmd
         text: Book
       - about.qmd
 
