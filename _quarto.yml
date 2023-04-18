@@ -15,7 +15,6 @@ website:
         text: Book
       - about.qmd
 
-
 format:
   html:
     theme: cosmo
