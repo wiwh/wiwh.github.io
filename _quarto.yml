@@ -15,9 +15,14 @@ website:
         text: Book
       - about.qmd
 
+body-footer: | 
+  Website designed with quarto by Guillaume Blanc. 2023 all rights reserved.
+
 format:
   html:
-    theme: cosmo
+    theme: 
+      - simplex
+      - custom.scss
     css: styles.css
     toc: true
 
