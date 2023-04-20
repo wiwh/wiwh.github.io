@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.324">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Guillaum eBlanc">
+<meta name="dcterms.date" content="2023-03-22">
+
+<title>Guillaume Blanc - VAE Implementation for Nonlinear Latent Variable Modeling</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+<style>
+    .quarto-title-block .quarto-title-banner,
+    .quarto-title-block .quarto-title-banner h1,
+    .quarto-title-block .quarto-title-banner h2,
+    .quarto-title-block .quarto-title-banner h3,
+    .quarto-title-block .quarto-title-banner h4,
+    .quarto-title-block .quarto-title-banner h5,
+    .quarto-title-block .quarto-title-banner h6
+    {
+      color: #3d3d5c;
+    }
+    </style>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Guillaume Blanc</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html" rel="" target="">
+ <span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../projects.html" rel="" target="">
+ <span class="menu-text">Projects</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../latent-book.html" rel="" target="">
+ <span class="menu-text">Book</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../cv.html" rel="" target="">
+ <span class="menu-text">CV</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html" rel="" target="">
+ <span class="menu-text">About</span></a>
+  </li>  
+</ul>
+            <div class="quarto-navbar-tools ms-auto">
+</div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-page-left">
+      <h1 class="title">VAE Implementation for Nonlinear Latent Variable Modeling</h1>
+                                <div class="quarto-categories">
+                <div class="quarto-category">news</div>
+                <div class="quarto-category">code</div>
+                <div class="quarto-category">analysis</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Guillaum eBlanc </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">March 22, 2023</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#load-data" id="toc-load-data" class="nav-link active" data-scroll-target="#load-data">Load data</a></li>
+  <li><a href="#create-the-sampling-layer" id="toc-create-the-sampling-layer" class="nav-link" data-scroll-target="#create-the-sampling-layer">Create the sampling layer</a></li>
+  <li><a href="#create-the-encoder" id="toc-create-the-encoder" class="nav-link" data-scroll-target="#create-the-encoder">Create the encoder</a></li>
+  <li><a href="#create-the-decoder" id="toc-create-the-decoder" class="nav-link" data-scroll-target="#create-the-decoder">Create the Decoder</a></li>
+  <li><a href="#create-the-variational-autoencoder" id="toc-create-the-variational-autoencoder" class="nav-link" data-scroll-target="#create-the-variational-autoencoder">Create the variational autoencoder</a></li>
+  <li><a href="#plot" id="toc-plot" class="nav-link" data-scroll-target="#plot">Plot</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block column-page-left" id="quarto-document-content">
+
+
+
+
+<p>This is variational auto-encoder (VAE) implementation using tensorflow of the following non-linear latent variable model with one latent variable:</p>
+<p><span class="math display">\[\begin{align*}
+    Z &amp;\sim N(0, 1)\\
+    X_j | Z &amp;= g_j(Z) + \epsilon_j\\
+    \epsilon_j &amp;\sim N(0, \sigma_j^2), \quad j=1, \dots, p
+\end{align*}\]</span></p>
+<p>This model can be likened to a non-linar factor analysis model, or, with the assumption that <span class="math inline">\(\sigma_j = \sigma \quad \forall j\)</span>, to a one-dimensional non-linear probabilistic principal component analysis (PPCA) model.</p>
+<p>Given some observed data <span class="math inline">\(\{X^{(i)}\}_{i=1}^n\)</span> with <span class="math inline">\(X^{(i)} \in \mathbb R^p\)</span>, the goal is to estimate the functions <span class="math inline">\(g_j: \mathbb R \to \mathbb R\)</span>.</p>
+<div class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> tensorflow <span class="im">as</span> tf</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tensorflow <span class="im">import</span> keras</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tensorflow.keras <span class="im">import</span> layers</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="load-data" class="level2">
+<h2 class="anchored" data-anchor-id="load-data">Load data</h2>
+<p>We load a toy dataset with dimensions <span class="math inline">\(n=100, p=100\)</span>.</p>
+<div class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> pd.read_csv(<span class="st">"./data/q1/data_1_200_100_1.csv"</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> np.array(data, dtype<span class="op">=</span><span class="st">'float32'</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> np.expand_dims(data, axis<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>data_train <span class="op">=</span> data[:<span class="bu">int</span>(data.shape[<span class="dv">0</span>]<span class="op">*</span><span class="fl">.9</span>)]</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>data_test  <span class="op">=</span> data[<span class="bu">int</span>(data.shape[<span class="dv">0</span>]<span class="op">*</span><span class="fl">.9</span>):]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>data_train.shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="3">
+<pre><code>(180, 100, 1)</code></pre>
+</div>
+</div>
+</section>
+<section id="create-the-sampling-layer" class="level2">
+<h2 class="anchored" data-anchor-id="create-the-sampling-layer">Create the sampling layer</h2>
+<div class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Sampling(layers.Layer):</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Uses (z_mean, z_log_var) to sample z, the vector encoding a digit."""</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> call(<span class="va">self</span>, inputs):</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>        z_mean, z_log_var <span class="op">=</span> inputs</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>        batch <span class="op">=</span> tf.shape(z_mean)[<span class="dv">0</span>]</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>        dim <span class="op">=</span> tf.shape(z_mean)[<span class="dv">1</span>]</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>        epsilon <span class="op">=</span> tf.keras.backend.random_normal(shape<span class="op">=</span>(batch, dim))</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> z_mean <span class="op">+</span> tf.exp(<span class="fl">0.5</span> <span class="op">*</span> z_log_var) <span class="op">*</span> epsilon</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="create-the-encoder" class="level2">
+<h2 class="anchored" data-anchor-id="create-the-encoder">Create the encoder</h2>
+<p>The encoder encodes the observed variables into the parameters of the posterior distribution of <span class="math inline">\(Z^{(i)}|Y^{(i)}\)</span>. Both the mean and variance share the first layer.</p>
+<div class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>latent_dim <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>encoder_inputs <span class="op">=</span> keras.Input(shape<span class="op">=</span>data_train.shape[<span class="dv">1</span>:])</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> layers.Flatten()(encoder_inputs)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> layers.Dense(<span class="dv">100</span>, activation<span class="op">=</span><span class="st">"relu"</span>)(x)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>z_mean <span class="op">=</span> layers.Dense(<span class="dv">100</span>, activation<span class="op">=</span><span class="st">"relu"</span>)(x)</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>z_mean <span class="op">=</span> layers.Dense(<span class="dv">100</span>, activation<span class="op">=</span><span class="st">"relu"</span>)(x)</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>z_mean <span class="op">=</span>layers.Dense(latent_dim, name<span class="op">=</span><span class="st">"z_mean"</span>, activation<span class="op">=</span><span class="st">"linear"</span>)(z_mean)</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>z_log_var <span class="op">=</span> layers.Dense(<span class="dv">100</span>, activation<span class="op">=</span><span class="st">"relu"</span>)(x)</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>z_log_var <span class="op">=</span> layers.Dense(<span class="dv">100</span>, activation<span class="op">=</span><span class="st">"relu"</span>)(x)</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>z_log_var <span class="op">=</span> layers.Dense(latent_dim, name<span class="op">=</span><span class="st">"z_log_var"</span>, activation<span class="op">=</span><span class="st">"linear"</span>)(z_log_var)</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>z <span class="op">=</span> Sampling()([z_mean, z_log_var])</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>encoder <span class="op">=</span> keras.Model(encoder_inputs, [z_mean, z_log_var, z], name<span class="op">=</span><span class="st">"encoder"</span>)</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>encoder.summary()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Model: "encoder"
+__________________________________________________________________________________________________
+ Layer (type)                   Output Shape         Param #     Connected to                     
+==================================================================================================
+ input_1 (InputLayer)           [(None, 100, 1)]     0           []                               
+                                                                                                  
+ flatten (Flatten)              (None, 100)          0           ['input_1[0][0]']                
+                                                                                                  
+ dense (Dense)                  (None, 100)          10100       ['flatten[0][0]']                
+                                                                                                  
+ dense_2 (Dense)                (None, 100)          10100       ['dense[0][0]']                  
+                                                                                                  
+ dense_4 (Dense)                (None, 100)          10100       ['dense[0][0]']                  
+                                                                                                  
+ z_mean (Dense)                 (None, 1)            101         ['dense_2[0][0]']                
+                                                                                                  
+ z_log_var (Dense)              (None, 1)            101         ['dense_4[0][0]']                
+                                                                                                  
+ sampling (Sampling)            (None, 1)            0           ['z_mean[0][0]',                 
+                                                                  'z_log_var[0][0]']              
+                                                                                                  
+==================================================================================================
+Total params: 30,502
+Trainable params: 30,502
+Non-trainable params: 0
+__________________________________________________________________________________________________</code></pre>
+</div>
+</div>
+</section>
+<section id="create-the-decoder" class="level2">
+<h2 class="anchored" data-anchor-id="create-the-decoder">Create the Decoder</h2>
+<p>The decoder has to be flexible enough to be able to model the functions <span class="math inline">\(g_j\)</span>, which models the conditional means of the responses. On top of that, the decoder models the residual variances <span class="math inline">\(\sigma_j\)</span>.</p>
+<div class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>latent_inputs <span class="op">=</span> keras.Input(shape<span class="op">=</span>(latent_dim,))</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> layers.Dense(<span class="dv">50</span>, activation<span class="op">=</span><span class="st">"relu"</span>)(latent_inputs)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> layers.Dense(<span class="dv">100</span>, activation<span class="op">=</span><span class="st">"relu"</span>)(x)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>log_var <span class="op">=</span> layers.Dense(<span class="dv">100</span>, activation<span class="op">=</span><span class="st">"relu"</span>)(x)</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>log_var <span class="op">=</span> layers.Dense(<span class="dv">100</span>, activation<span class="op">=</span><span class="st">"linear"</span>)(log_var)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>log_var <span class="op">=</span> layers.Reshape(data_train.shape[<span class="dv">1</span>:])(log_var)</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>x_output <span class="op">=</span> layers.Dense(<span class="dv">100</span>, activation<span class="op">=</span><span class="st">"relu"</span>)(x)</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>x_output <span class="op">=</span> layers.Dense(<span class="dv">100</span>, activation<span class="op">=</span><span class="st">"linear"</span>)(x_output)</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>x_output <span class="op">=</span> layers.Reshape(data_train.shape[<span class="dv">1</span>:])(x_output)</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>decoder <span class="op">=</span> keras.Model(latent_inputs, [x_output, log_var], name<span class="op">=</span><span class="st">"decoder"</span>)</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>decoder.summary()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Model: "decoder"
+__________________________________________________________________________________________________
+ Layer (type)                   Output Shape         Param #     Connected to                     
+==================================================================================================
+ input_2 (InputLayer)           [(None, 1)]          0           []                               
+                                                                                                  
+ dense_5 (Dense)                (None, 50)           100         ['input_2[0][0]']                
+                                                                                                  
+ dense_6 (Dense)                (None, 100)          5100        ['dense_5[0][0]']                
+                                                                                                  
+ dense_9 (Dense)                (None, 100)          10100       ['dense_6[0][0]']                
+                                                                                                  
+ dense_7 (Dense)                (None, 100)          10100       ['dense_6[0][0]']                
+                                                                                                  
+ dense_10 (Dense)               (None, 100)          10100       ['dense_9[0][0]']                
+                                                                                                  
+ dense_8 (Dense)                (None, 100)          10100       ['dense_7[0][0]']                
+                                                                                                  
+ reshape_1 (Reshape)            (None, 100, 1)       0           ['dense_10[0][0]']               
+                                                                                                  
+ reshape (Reshape)              (None, 100, 1)       0           ['dense_8[0][0]']                
+                                                                                                  
+==================================================================================================
+Total params: 45,600
+Trainable params: 45,600
+Non-trainable params: 0
+__________________________________________________________________________________________________</code></pre>
+</div>
+</div>
+</section>
+<section id="create-the-variational-autoencoder" class="level2">
+<h2 class="anchored" data-anchor-id="create-the-variational-autoencoder">Create the variational autoencoder</h2>
+<p>The variational auto-encoder (VAE) is itself a <code>keras.Model</code> object. It consists of the <code>encoder</code> and <code>decoder</code> layers, a specialized <code>train_step</code> as well of some specialized <code>metrics</code> to keep track of our progress.</p>
+<div class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> VAE(keras.Model):</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, encoder, decoder, <span class="op">**</span>kwargs):</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>(<span class="op">**</span>kwargs)</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.encoder <span class="op">=</span> encoder</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.decoder <span class="op">=</span> decoder</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.total_loss_tracker <span class="op">=</span> keras.metrics.Mean(name<span class="op">=</span><span class="st">"total_loss"</span>)</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.reconstruction_loss_tracker <span class="op">=</span> keras.metrics.Mean(</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>            name<span class="op">=</span><span class="st">"reconstruction_loss"</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.kl_loss_tracker <span class="op">=</span> keras.metrics.Mean(name<span class="op">=</span><span class="st">"kl_loss"</span>)</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">@property</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> metrics(<span class="va">self</span>):</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> [</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.total_loss_tracker,</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.reconstruction_loss_tracker,</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.kl_loss_tracker,</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> train_step(<span class="va">self</span>, data):</span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">with</span> tf.GradientTape() <span class="im">as</span> tape:</span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>            z_mean, z_log_var, z <span class="op">=</span> <span class="va">self</span>.encoder(data)</span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>            reconstruction, logvar <span class="op">=</span> <span class="va">self</span>.decoder(z)</span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>            logvar <span class="op">=</span> tf.reduce_mean(logvar, axis<span class="op">=</span><span class="dv">1</span>, keepdims<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Reconstruction loss (including the residual variances)</span></span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>            reconstruction_loss <span class="op">=</span> <span class="fl">0.5</span> <span class="op">*</span> tf.reduce_mean(tf.reduce_sum((data <span class="op">-</span> reconstruction)<span class="op">**</span><span class="dv">2</span> <span class="op">*</span> tf.math.exp(<span class="op">-</span>logvar) <span class="op">+</span> logvar <span class="op">+</span> tf.math.log(<span class="fl">2.</span> <span class="op">*</span> np.pi), axis<span class="op">=</span><span class="dv">1</span>))</span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>            <span class="co"># ELBO loss, approximating the posterior with a Gaussian.</span></span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>            kl_loss <span class="op">=</span> <span class="op">-</span><span class="fl">0.5</span> <span class="op">*</span> (<span class="dv">1</span> <span class="op">+</span> z_log_var <span class="op">-</span> tf.square(z_mean) <span class="op">-</span> tf.exp(z_log_var))</span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>            kl_loss <span class="op">=</span> tf.reduce_mean(tf.reduce_sum(kl_loss, axis<span class="op">=</span><span class="dv">1</span>))</span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>            total_loss <span class="op">=</span> reconstruction_loss <span class="op">+</span> kl_loss</span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a>        grads <span class="op">=</span> tape.gradient(total_loss, <span class="va">self</span>.trainable_weights)</span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.optimizer.apply_gradients(<span class="bu">zip</span>(grads, <span class="va">self</span>.trainable_weights))</span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.total_loss_tracker.update_state(total_loss)</span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.reconstruction_loss_tracker.update_state(reconstruction_loss)</span>
+<span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.kl_loss_tracker.update_state(kl_loss)</span>
+<span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> {</span>
+<span id="cb10-40"><a href="#cb10-40" aria-hidden="true" tabindex="-1"></a>            <span class="st">"total_loss"</span>: <span class="va">self</span>.total_loss_tracker.result(),</span>
+<span id="cb10-41"><a href="#cb10-41" aria-hidden="true" tabindex="-1"></a>            <span class="st">"reconstruction_loss"</span>: <span class="va">self</span>.reconstruction_loss_tracker.result(),</span>
+<span id="cb10-42"><a href="#cb10-42" aria-hidden="true" tabindex="-1"></a>            <span class="st">"kl_loss"</span>: <span class="va">self</span>.kl_loss_tracker.result(),</span>
+<span id="cb10-43"><a href="#cb10-43" aria-hidden="true" tabindex="-1"></a>        }</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now Markdown</p>
+<div class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>vae <span class="op">=</span> VAE(encoder, decoder)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>vae.<span class="bu">compile</span>(optimizer<span class="op">=</span>keras.optimizers.Adam())</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>vae.fit(data_train, epochs<span class="op">=</span><span class="dv">200</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="plot" class="level2">
+<h2 class="anchored" data-anchor-id="plot">Plot</h2>
+<p>We now plot the fit, i.e.&nbsp;the reconstruction vs the original data.</p>
+<div class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>encoded, _, _ <span class="op">=</span> vae.encoder.predict(data_train)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>decoded, var <span class="op">=</span> vae.decoder.predict(encoded)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>f, ax <span class="op">=</span> plt.subplots()</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>ax.scatter(</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    data_train.reshape((np.prod(decoded.shape),)),</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    decoded.reshape((np.prod(decoded.shape),))</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>ax.plot([<span class="op">-</span><span class="dv">5</span>,<span class="dv">5</span>], [<span class="op">-</span><span class="dv">5</span>,<span class="dv">5</span>], <span class="st">'k-'</span>)</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Reconstructed vs Original data."</span>)</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Original data."</span>)</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Reconstructed data."</span>)</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>6/6 [==============================] - 0s 3ms/step
+6/6 [==============================] - 0s 2ms/step</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="vae_files/figure-html/cell-10-output-2.png" class="img-fluid"></p>
+</div>
+</div>
+<p>We can also plot the estimated latent variables (the encoded data), which should approximately be standard normal random variables.</p>
+<div class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>plt.hist(encoded)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Empirical distribution of the estimated latent variables."</span>)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Value of the estimated latent variable."</span>)</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Frequency"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="10">
+<pre><code>Text(0, 0.5, 'Frequency')</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="vae_files/figure-html/cell-11-output-2.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Finally, we can also plot a selection of the <span class="math inline">\(g_j\)</span> functions.</p>
+<div class="cell" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Define a range of values to plot</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>z_grid <span class="op">=</span> np.arange(<span class="op">-</span><span class="dv">3</span>,<span class="dv">3</span>, <span class="fl">.1</span>)</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>z_grid <span class="op">=</span> np.expand_dims(z_grid, axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Obtain the map of these values through the estimated g_j functions</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>y_grid, _ <span class="op">=</span> vae.decoder.predict(z_grid)</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot 20 of these</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> <span class="dv">20</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>plt.figure()</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(n):</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>    plt.subplot(<span class="dv">4</span>,<span class="bu">int</span>(n<span class="op">/</span><span class="dv">4</span>),i<span class="op">+</span><span class="dv">1</span>)</span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>    plt.plot(z_grid[:,<span class="op">-</span><span class="dv">1</span>], y_grid[:,i, <span class="op">-</span><span class="dv">1</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>2/2 [==============================] - 0s 5ms/step</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="vae_files/figure-html/cell-12-output-2.png" class="img-fluid"></p>
+</div>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

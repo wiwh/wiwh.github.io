@@ -1,5 +1,6 @@
 ---
 title: "Unobservable"
+page-layout: full
 ---
 
 Unobservable: latent variable models for multivariate data.
