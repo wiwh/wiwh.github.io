@@ -1,12 +1,5 @@
 [
   {
-    "objectID": "about.html",
-    "href": "about.html",
-    "title": "About",
-    "section": "",
-    "text": "About this site"
-  },
-  {
     "objectID": "cv.html",
     "href": "cv.html",
     "title": "Curriculum vitae",
@@ -81,6 +74,20 @@
     "href": "projects.html",
     "title": "Projects",
     "section": "",
-    "text": "Iris K-Means Clustering\n\n\n\n\n\n\n\n\n\n\n \n\n\n\n\n  \n\n\n\n\nVAE Implementation for Nonlinear Latent Variable Modeling\n\n\n\n\n\n\n\nnews\n\n\ncode\n\n\nanalysis\n\n\n\n\n\n\n\n\n\n\n\nMar 22, 2023\n\n\nGuillaum eBlanc\n\n\n\n\n\n\nNo matching items"
+    "text": "VAE Implementation for Nonlinear Latent Variable Modeling\n\n\n\n\n\n\n\nnews\n\n\ncode\n\n\nanalysis\n\n\n\n\n\n\n\n\n\n\n\nMar 22, 2023\n\n\nGuillaum eBlanc\n\n\n\n\n\n\nNo matching items"
+  },
+  {
+    "objectID": "tidbits/001_oanth/oanth.html",
+    "href": "tidbits/001_oanth/oanth.html",
+    "title": "Connecting to Strava using oanth2",
+    "section": "",
+    "text": "test"
+  },
+  {
+    "objectID": "tidbits.html",
+    "href": "tidbits.html",
+    "title": "Tidbits",
+    "section": "",
+    "text": "I use this page to post small code snippets, helpers, howtos or hacks.\n\n\n\n\n\n\n\n\n  \n\n\n\n\nConnecting to Strava using oanth2\n\n\n\n\n\n\n\n\n\n\n \n\n\n\n\nNo matching items"
   }
 ]

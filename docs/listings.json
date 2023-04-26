@@ -2,8 +2,13 @@
   {
     "listing": "/projects.html",
     "items": [
-      "/posts/002_test/faithful.html",
       "/posts/001_vae/vae.html"
+    ]
+  },
+  {
+    "listing": "/tidbits.html",
+    "items": [
+      "/tidbits/001_oanth/oanth.html"
     ]
   }
 ]

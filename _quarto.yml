@@ -11,13 +11,14 @@ website:
     left:
       - href: index.qmd
         text: Home
-      - projects.qmd
       - href: latent-book.qmd
         text: Book
+      - projects.qmd
+      - href: tidbits.qmd
+        text: Tidbits
       - href: cv.qmd
         text: CV
-      - about.qmd
-
+        
 body-footer: | 
   Website designed with quarto by Guillaume Blanc. 2023 all rights reserved.
 
