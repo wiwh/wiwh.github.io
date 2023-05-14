@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Guillaume Blanc - Connecting to Strava using oanth2</title>
+<title>Guillaume Blanc - Setting up a minimal data-science environment in Windows using WSL (part I)</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -19,6 +19,40 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -111,16 +145,36 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#install-conda-in-wsl" id="toc-install-conda-in-wsl" class="nav-link active" data-scroll-target="#install-conda-in-wsl">Install Conda in WSL</a>
+  <ul class="collapse">
+  <li><a href="#install-wsl" id="toc-install-wsl" class="nav-link" data-scroll-target="#install-wsl">Install WSL</a>
+  <ul class="collapse">
+  <li><a href="#accessing-your-folders-and-setting-things-up" id="toc-accessing-your-folders-and-setting-things-up" class="nav-link" data-scroll-target="#accessing-your-folders-and-setting-things-up">Accessing your folders and setting things up</a></li>
+  </ul></li>
+  <li><a href="#update-the-linux-distribution" id="toc-update-the-linux-distribution" class="nav-link" data-scroll-target="#update-the-linux-distribution">Update the Linux distribution</a></li>
+  <li><a href="#install-python-3" id="toc-install-python-3" class="nav-link" data-scroll-target="#install-python-3">Install python 3</a></li>
+  <li><a href="#install-miniconda" id="toc-install-miniconda" class="nav-link" data-scroll-target="#install-miniconda">Install miniconda</a></li>
+  </ul></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
-<main class="content column-page" id="quarto-document-content">
+<main class="content column-page-left" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Connecting to Strava using oanth2</h1>
-</div>
+<h1 class="title">Setting up a minimal data-science environment in Windows using WSL (part I)</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">code</div>
+    <div class="quarto-category">linux</div>
+    <div class="quarto-category">setup</div>
+  </div>
+  </div>
 
 
 
@@ -134,9 +188,106 @@ ul.task-list li input[type="checkbox"] {
 
 </header>
 
-<p>test</p>
+<section id="install-conda-in-wsl" class="level1">
+<h1>Install Conda in WSL</h1>
+<p>This is the first part of a series of tidbits to set up a data-science environement in linux alongside windows, using windows subsystem for linux (WSL).</p>
+<p>This will include conda as a package / environment manager, using the minimal version miniconda, and the following data-science packages installed for the default interpreter.</p>
+<ul>
+<li>numpy</li>
+<li>scipy</li>
+<li>scikit-learn</li>
+<li>matplotlib</li>
+<li>seaborn</li>
+<li>pandas</li>
+<li>Jupyter</li>
+</ul>
+<p>For deep learning packages, this comes next.</p>
+<section id="install-wsl" class="level2">
+<h2 class="anchored" data-anchor-id="install-wsl">Install WSL</h2>
+<p>Install WSL: Open a powershell as administrator and run</p>
+<div class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>wsl <span class="op">--</span>install</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Check the installation and version with</p>
+<div class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>wsl <span class="op">-</span>l <span class="op">-</span>v</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>To activate the Bash shell type</p>
+<div class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>wsl</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>To exit the shell type</p>
+<div class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>exit</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>You can now use Bash to run linux tools and applications. During the installation process, make note of your <em>login</em> and <em>password</em>.</p>
+<section id="accessing-your-folders-and-setting-things-up" class="level3">
+<h3 class="anchored" data-anchor-id="accessing-your-folders-and-setting-things-up">Accessing your folders and setting things up</h3>
+<p>Your <code>home</code> directory is accessed using <code>cd ~</code>. Create a <code>Downloads</code> directory and navigate to it:</p>
+<div class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>cd <span class="op">~</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>mkdir Downloads</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>cd Downloads</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>You can use <code>explorer.exe .</code> to open File Explorer from the current directory.</p>
+</section>
+</section>
+<section id="update-the-linux-distribution" class="level2">
+<h2 class="anchored" data-anchor-id="update-the-linux-distribution">Update the Linux distribution</h2>
+<p>Run the following code to update the linux distribution you just installed and make sur it is up-to-date:</p>
+<div class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>sudo apt update</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>sudo apt upgrade</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="install-python-3" class="level2">
+<h2 class="anchored" data-anchor-id="install-python-3">Install python 3</h2>
+<p>Python comes pre-installed in WSL. Check the version:</p>
+<div class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>python3 <span class="op">--</span>version</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>If somehow it is not installed, you can install it by running</p>
+<div class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>sudo apt install python3</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="install-miniconda" class="level2">
+<h2 class="anchored" data-anchor-id="install-miniconda">Install miniconda</h2>
+<p>Even though WSL comes with python 3 pre-installed, we will use miniconda’s python distribution, which includes a package manager.</p>
+<p>Go to <a href="https://docs.conda.io/en/latest/miniconda.html">https://docs.conda.io/en/latest/miniconda.html</a> to download the installer of your choice (listed under Linux). At the time of this writing the latest installer includes Python 3.10, and put it inside your <code>~/Downloads</code> folder, which is accessible from windows using the above-mentioned <code>explorer.exe .</code> command.</p>
+<p>Place your downloaded file in this directory.</p>
+<div class="callout callout-style-default callout-caution callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Copying files from Windows to WSL
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>When you copy a file from Windows to a Linux directory in WSL, Windows may add a <code>Zone.Identifier</code> file to the directory containing the copied file. This is because Windows considers the Linux directory to be a network location, and adds the file to provide security information for the copied file.</p>
+<p>The <code>Zone.Identifier</code> file is used by Windows to help protect against the execution of potentially harmful files that may have been downloaded from the internet or copied from an untrusted source. When a file is opened, Windows checks the <code>Zone.Identifier</code> file to determine if the file is safe to execute.</p>
+<p>This may prevent you from installing the file you just downloaded. In this case, simply delete the <code>Zone.Identifier</code> file.</p>
+</div>
+</div>
+</div>
+<p>Make the script executable:</p>
+<div class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>chmod <span class="op">+</span>x your_conda_installer.sh</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>And run the bash script:</p>
+<div class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>.<span class="op">/</span>your_conda_installer.sh</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Follow the prompts, say <code>yes</code> to all. Quit WSL and start again so it recognizes the path to conda.</p>
+<p>You’re done! Check your conda version using <code>conda --version</code>.</p>
 
 
+</section>
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

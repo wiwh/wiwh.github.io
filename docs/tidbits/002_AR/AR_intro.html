@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Guillaume Blanc - Connecting to Strava using oanth2</title>
+<title>Guillaume Blanc - RNN state space models</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -20,7 +20,26 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -59,6 +78,8 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
 <link rel="stylesheet" href="../../styles.css">
 </head>
@@ -111,15 +132,27 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#goal" id="toc-goal" class="nav-link active" data-scroll-target="#goal">Goal</a></li>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link" data-scroll-target="#introduction">Introduction</a>
+  <ul class="collapse">
+  <li><a href="#the-arp-processes" id="toc-the-arp-processes" class="nav-link" data-scroll-target="#the-arp-processes">The AR(p) Processes</a></li>
+  <li><a href="#the-ar1-processes" id="toc-the-ar1-processes" class="nav-link" data-scroll-target="#the-ar1-processes">The AR(1) Processes</a></li>
+  <li><a href="#rnn" id="toc-rnn" class="nav-link" data-scroll-target="#rnn">RNN</a></li>
+  </ul></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
-<main class="content column-page" id="quarto-document-content">
+<main class="content column-page-left" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Connecting to Strava using oanth2</h1>
+<h1 class="title">RNN state space models</h1>
 </div>
 
 
@@ -134,11 +167,62 @@ ul.task-list li input[type="checkbox"] {
 
 </header>
 
-<p>test</p>
+<section id="goal" class="level1">
+<h1>Goal</h1>
+<p>Present RNN state space models, in the context of latent-variable modeling, and see if I have some ideas for their estimation.</p>
+</section>
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<p>Recurrent state-space models <span class="citation" data-cites="rangapuram2018deep">Rangapuram et al. (<a href="#ref-rangapuram2018deep" role="doc-biblioref">2018</a>)</span>, also known as recurrent neural state space models, combine the concepts of recurrent neural networks (RNNs) with state-space models. They provide a framework for modeling and analyzing sequential data that exhibits temporal dependencies and nonlinear dynamics.</p>
+<p>State-space models (<span class="citation" data-cites="durbin2012time">Durbin and Koopman (<a href="#ref-durbin2012time" role="doc-biblioref">2012</a>)</span>), including ARIMA models, are widely used in various fields, including control theory, signal processing, and time series analysis. They decompose a system into two components: latent state variables and observed outputs. The latent state variables capture the underlying dynamics of the system, while the observed outputs represent the measurements or observations of the system.</p>
+<p>In recurrent state-space models, RNNs are employed to model the dynamics of the latent state variables. RNNs have a recurrent connection that allows them to maintain and update a hidden state as new information is processed. This hidden state effectively captures the temporal dependencies and enables the modeling of sequential data.</p>
+<p>The RNN in a recurrent state-space model takes as input the previous hidden state and the current input observation, and it produces the updated hidden state as the output. This recurrent structure enables the model to learn and represent the temporal evolution of the latent states over time.</p>
+<p>By combining RNNs with state-space models, recurrent state-space models can capture complex nonlinear dynamics and learn the latent states directly from observed data. This makes them useful for tasks such as time series forecasting, system identification, anomaly detection, and control in domains where temporal dependencies and nonlinear dynamics play a crucial role.</p>
+<p>The estimation and learning of recurrent state-space models involve techniques such as maximum likelihood estimation, expectation-maximization algorithms, and variational inference methods. These methods aim to optimize the model parameters and infer the latent states that best explain the observed data.</p>
+<p>Recurrent state-space models have been applied in various domains, including robotics, finance, natural language processing, and speech recognition, among others. They provide a powerful framework for modeling and understanding sequential data with complex dynamics and temporal dependencies.</p>
+<section id="the-arp-processes" class="level2">
+<h2 class="anchored" data-anchor-id="the-arp-processes">The AR(p) Processes</h2>
+<p>An AR(p) process of order <span class="math inline">\(p\)</span> is a time series model where the current value of the variable is a linear combination of the <span class="math inline">\(p\)</span> most recent values of the same variable, plus a random error term. Mathematical representation: The general form of an AR(p) process can be written as:</p>
+<p><span class="math display">\[
+   Y_t = b + \phi_1Y_{t-1} + \phi_2Y_{t-2} + \ldots + \phi_pY_{t-p} + \varepsilon_t
+   \]</span></p>
+<p>where <span class="math inline">\(Y_t\)</span> represents the value of the variable at time <span class="math inline">\(t\)</span>, <span class="math inline">\(b\)</span> is a constant we will call the <em>bias</em>, <span class="math inline">\(\phi_1, \phi_2, \ldots, \phi_p\)</span> are the autoregressive parameters, <span class="math inline">\(\varepsilon_t\)</span> is a random error term. A AR(p) can be simply re-written as:</p>
+<p><span class="math display">\[
+Y_t = g_\theta(Y_{t-1}, Y_{t-2}, \ldots, Y_{t-p}) + \varepsilon_t
+\]</span></p>
+<p>for some function <span class="math inline">\(g\)</span> linear in its arguments.</p>
+</section>
+<section id="the-ar1-processes" class="level2">
+<h2 class="anchored" data-anchor-id="the-ar1-processes">The AR(1) Processes</h2>
+<p>An AR(1) process is thus simply</p>
+<p><span class="math display">\[
+Y_t = b + \phi_1 Y_{t-1} + \varepsilon_t
+\]</span></p>
+</section>
+<section id="rnn" class="level2">
+<h2 class="anchored" data-anchor-id="rnn">RNN</h2>
+<p>A RNN</p>
+<ol start="3" type="1">
+<li><p>Stationarity: For an AR process to be stationary, the autoregressive parameters ((_1, _2, , _p)) must satisfy certain conditions. Specifically, the roots of the characteristic equation must be outside the unit circle.</p></li>
+<li><p>Autocorrelation: AR processes exhibit autocorrelation, which means that the values of the variable are correlated with their past values. The autocorrelation function (ACF) of an AR process shows the correlation between observations at different lags.</p></li>
+<li><p>Model estimation: Estimating the parameters of an AR(p) process involves techniques such as maximum likelihood estimation (MLE) or least squares estimation (LSE). The estimated parameters can be used to make predictions and generate forecasts for future values of the variable.</p></li>
+<li><p>Order selection: Determining the appropriate order of an AR process ((p) value) is an important step. It can be done using statistical techniques such as the Akaike Information Criterion (AIC) or Bayesian Information Criterion (BIC), which help choose the optimal order based on the model’s goodness of fit and complexity.</p></li>
+</ol>
+<p>AR processes are widely used in time series analysis and forecasting. They provide a flexible framework for modeling and understanding the behavior of a variable over time based on its own past values.</p>
 
 
 
-</main> <!-- /main -->
+</section>
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="ref-durbin2012time" class="csl-entry" role="listitem">
+Durbin, James, and Siem Jan Koopman. 2012. <em>Time Series Analysis by State Space Methods</em>. Vol. 38. OUP Oxford.
+</div>
+<div id="ref-rangapuram2018deep" class="csl-entry" role="listitem">
+Rangapuram, Syama Sundar, Matthias W Seeger, Jan Gasthaus, Lorenzo Stella, Yuyang Wang, and Tim Januschowski. 2018. <span>“Deep State Space Models for Time Series Forecasting.”</span> <em>Advances in Neural Information Processing Systems</em> 31.
+</div>
+</div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {

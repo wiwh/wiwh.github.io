@@ -1,0 +1,64 @@
+---
+title: RNN state space models
+bibliography: references.bib
+---
+
+# Goal
+Present RNN state space models, in the context of latent-variable modeling, and see if I have some ideas for their estimation.
+
+
+
+
+# Introduction
+
+Recurrent state-space models @rangapuram2018deep, also known as recurrent neural state space models, combine the concepts of recurrent neural networks (RNNs) with state-space models. They provide a framework for modeling and analyzing sequential data that exhibits temporal dependencies and nonlinear dynamics.
+
+State-space models (@durbin2012time), including ARIMA models, are widely used in various fields, including control theory, signal processing, and time series analysis. They decompose a system into two components: latent state variables and observed outputs. The latent state variables capture the underlying dynamics of the system, while the observed outputs represent the measurements or observations of the system.
+
+In recurrent state-space models, RNNs are employed to model the dynamics of the latent state variables. RNNs have a recurrent connection that allows them to maintain and update a hidden state as new information is processed. This hidden state effectively captures the temporal dependencies and enables the modeling of sequential data.
+
+The RNN in a recurrent state-space model takes as input the previous hidden state and the current input observation, and it produces the updated hidden state as the output. This recurrent structure enables the model to learn and represent the temporal evolution of the latent states over time.
+
+By combining RNNs with state-space models, recurrent state-space models can capture complex nonlinear dynamics and learn the latent states directly from observed data. This makes them useful for tasks such as time series forecasting, system identification, anomaly detection, and control in domains where temporal dependencies and nonlinear dynamics play a crucial role.
+
+The estimation and learning of recurrent state-space models involve techniques such as maximum likelihood estimation, expectation-maximization algorithms, and variational inference methods. These methods aim to optimize the model parameters and infer the latent states that best explain the observed data.
+
+Recurrent state-space models have been applied in various domains, including robotics, finance, natural language processing, and speech recognition, among others. They provide a powerful framework for modeling and understanding sequential data with complex dynamics and temporal dependencies.
+
+## The AR(p) Processes
+
+An AR(p) process of order $p$ is a time series model where the current value of the variable is a linear combination of the $p$ most recent values of the same variable, plus a random error term. Mathematical representation: The general form of an AR(p) process can be written as:
+
+   $$
+   Y_t = b + \phi_1Y_{t-1} + \phi_2Y_{t-2} + \ldots + \phi_pY_{t-p} + \varepsilon_t
+   $$
+
+where $Y_t$ represents the value of the variable at time $t$, $b$ is a constant we will call the _bias_, $\phi_1, \phi_2, \ldots, \phi_p$ are the autoregressive parameters, $\varepsilon_t$ is a random error term. A AR(p) can be simply re-written as:
+
+$$
+Y_t = g_\theta(Y_{t-1}, Y_{t-2}, \ldots, Y_{t-p}) + \varepsilon_t
+$$
+
+for some function $g$ linear in its arguments.
+
+## The AR(1) Processes
+
+An AR(1) process is thus simply
+
+$$
+Y_t = b + \phi_1 Y_{t-1} + \varepsilon_t
+$$
+
+## RNN
+
+A RNN 
+
+3. Stationarity: For an AR process to be stationary, the autoregressive parameters (\(\phi_1, \phi_2, \ldots, \phi_p\)) must satisfy certain conditions. Specifically, the roots of the characteristic equation must be outside the unit circle.
+
+4. Autocorrelation: AR processes exhibit autocorrelation, which means that the values of the variable are correlated with their past values. The autocorrelation function (ACF) of an AR process shows the correlation between observations at different lags.
+
+5. Model estimation: Estimating the parameters of an AR(p) process involves techniques such as maximum likelihood estimation (MLE) or least squares estimation (LSE). The estimated parameters can be used to make predictions and generate forecasts for future values of the variable.
+
+6. Order selection: Determining the appropriate order of an AR process (\(p\) value) is an important step. It can be done using statistical techniques such as the Akaike Information Criterion (AIC) or Bayesian Information Criterion (BIC), which help choose the optimal order based on the model's goodness of fit and complexity.
+
+AR processes are widely used in time series analysis and forecasting. They provide a flexible framework for modeling and understanding the behavior of a variable over time based on its own past values.

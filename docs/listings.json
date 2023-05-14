@@ -8,7 +8,10 @@
   {
     "listing": "/tidbits.html",
     "items": [
-      "/tidbits/001_oanth/oanth.html"
+      "/tidbits/001_oanth/oanth.html",
+      "/tidbits/002_AR/AR_intro.html",
+      "/tidbits/0032_WSL-conda-environment/WSL.html",
+      "/tidbits/003_WSL/WSL.html"
     ]
   }
 ]

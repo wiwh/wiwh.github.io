@@ -84,10 +84,80 @@
     "text": "test"
   },
   {
+    "objectID": "tidbits/002_AR/AR_intro.html",
+    "href": "tidbits/002_AR/AR_intro.html",
+    "title": "RNN state space models",
+    "section": "",
+    "text": "Present RNN state space models, in the context of latent-variable modeling, and see if I have some ideas for their estimation."
+  },
+  {
+    "objectID": "tidbits/002_AR/AR_intro.html#the-arp-processes",
+    "href": "tidbits/002_AR/AR_intro.html#the-arp-processes",
+    "title": "RNN state space models",
+    "section": "The AR(p) Processes",
+    "text": "The AR(p) Processes\nAn AR(p) process of order \\(p\\) is a time series model where the current value of the variable is a linear combination of the \\(p\\) most recent values of the same variable, plus a random error term. Mathematical representation: The general form of an AR(p) process can be written as:\n\\[\n   Y_t = b + \\phi_1Y_{t-1} + \\phi_2Y_{t-2} + \\ldots + \\phi_pY_{t-p} + \\varepsilon_t\n   \\]\nwhere \\(Y_t\\) represents the value of the variable at time \\(t\\), \\(b\\) is a constant we will call the bias, \\(\\phi_1, \\phi_2, \\ldots, \\phi_p\\) are the autoregressive parameters, \\(\\varepsilon_t\\) is a random error term. A AR(p) can be simply re-written as:\n\\[\nY_t = g_\\theta(Y_{t-1}, Y_{t-2}, \\ldots, Y_{t-p}) + \\varepsilon_t\n\\]\nfor some function \\(g\\) linear in its arguments."
+  },
+  {
+    "objectID": "tidbits/002_AR/AR_intro.html#the-ar1-processes",
+    "href": "tidbits/002_AR/AR_intro.html#the-ar1-processes",
+    "title": "RNN state space models",
+    "section": "The AR(1) Processes",
+    "text": "The AR(1) Processes\nAn AR(1) process is thus simply\n\\[\nY_t = b + \\phi_1 Y_{t-1} + \\varepsilon_t\n\\]"
+  },
+  {
+    "objectID": "tidbits/002_AR/AR_intro.html#rnn",
+    "href": "tidbits/002_AR/AR_intro.html#rnn",
+    "title": "RNN state space models",
+    "section": "RNN",
+    "text": "RNN\nA RNN\n\nStationarity: For an AR process to be stationary, the autoregressive parameters ((_1, _2, , _p)) must satisfy certain conditions. Specifically, the roots of the characteristic equation must be outside the unit circle.\nAutocorrelation: AR processes exhibit autocorrelation, which means that the values of the variable are correlated with their past values. The autocorrelation function (ACF) of an AR process shows the correlation between observations at different lags.\nModel estimation: Estimating the parameters of an AR(p) process involves techniques such as maximum likelihood estimation (MLE) or least squares estimation (LSE). The estimated parameters can be used to make predictions and generate forecasts for future values of the variable.\nOrder selection: Determining the appropriate order of an AR process ((p) value) is an important step. It can be done using statistical techniques such as the Akaike Information Criterion (AIC) or Bayesian Information Criterion (BIC), which help choose the optimal order based on the model’s goodness of fit and complexity.\n\nAR processes are widely used in time series analysis and forecasting. They provide a flexible framework for modeling and understanding the behavior of a variable over time based on its own past values."
+  },
+  {
+    "objectID": "tidbits/0032_WSL-conda-environment/WSL.html",
+    "href": "tidbits/0032_WSL-conda-environment/WSL.html",
+    "title": "Setting up a minimal data-science environment in Windows using WSL (part II)",
+    "section": "",
+    "text": "Set up a conda environment for data-science\nNow that we have conda installed, let us set up a conda environment called ds (for data-science). Open WSL, then run\n\nconda create -n ds \n\nActivate the environment:\n\nconda activate ds\n\nWhen you now run python3, it will launch the version of the python interpreter that came with anaconda (in the previous step), not the version that comes pre-installed with WSL.\nYou can now install the following basic data-science packages:\n\nconda install numpy scipy matplotlib seaborn scikit-learn pandas Jupyter\n\n\n\n\n\n\n\nInstalling packages through conda forge\n\n\n\nConda official repository only feature a few verified packages. A vast portion of python packages that are otherwise available through pip are installed through community led channel called conda-forge. You can visit their site to learn more about it. To do this, install your other packages package1 and package2 (say), by specifying the conda-forge channel :\n\nconda install -c conda-forge package1 package2\n\n\n\n\nTest your installation:\nWe now test the installation by using the following workflow:\n\nCreate a python script using the Windows text editor of your choice, save it in your ~/Downloads folder.\nExecute the script from Bash.\n\nCreate a new file called test.py in ~/Downloads with the following content:\n\nimport seaborn as sns\nimport matplotlib.pyplot as plt\nimport pandas as pd\nimport numpy as np\nfrom scipy import stats\n\n# Generate some random data\nnp.random.seed(42)\nx = np.random.normal(size=100)\ny = np.random.normal(size=100)\n\n# Create a DataFrame from the data\ndf = pd.DataFrame({'x': x, 'y': y})\n\n# Plot a scatter plot using Seaborn\nsns.scatterplot(data=df, x='x', y='y')\n\n# Add a regression line using SciPy\nslope, intercept, r_value, p_value, std_err = stats.linregress(x, y)\nplt.plot(x, slope * x + intercept, color='red')\n\n# Set the x and y labels using Matplotlib\nplt.xlabel('X')\nplt.ylabel('Y')\n\n# Show the plot\nplt.show()\n\nand run it with\n\npython3 ~/Downloads/test.py"
+  },
+  {
+    "objectID": "tidbits/003_WSL/WSL.html",
+    "href": "tidbits/003_WSL/WSL.html",
+    "title": "Setting up a minimal data-science environment in Windows using WSL (part I)",
+    "section": "",
+    "text": "This is the first part of a series of tidbits to set up a data-science environement in linux alongside windows, using windows subsystem for linux (WSL).\nThis will include conda as a package / environment manager, using the minimal version miniconda, and the following data-science packages installed for the default interpreter.\n\nnumpy\nscipy\nscikit-learn\nmatplotlib\nseaborn\npandas\nJupyter\n\nFor deep learning packages, this comes next.\n\n\nInstall WSL: Open a powershell as administrator and run\n\nwsl --install\n\nCheck the installation and version with\n\nwsl -l -v\n\nTo activate the Bash shell type\n\nwsl\n\nTo exit the shell type\n\nexit\n\nYou can now use Bash to run linux tools and applications. During the installation process, make note of your login and password.\n\n\nYour home directory is accessed using cd ~. Create a Downloads directory and navigate to it:\n\ncd ~\nmkdir Downloads\ncd Downloads\n\nYou can use explorer.exe . to open File Explorer from the current directory.\n\n\n\n\nRun the following code to update the linux distribution you just installed and make sur it is up-to-date:\n\nsudo apt update\nsudo apt upgrade\n\n\n\n\nPython comes pre-installed in WSL. Check the version:\n\npython3 --version\n\nIf somehow it is not installed, you can install it by running\n\nsudo apt install python3\n\n\n\n\nEven though WSL comes with python 3 pre-installed, we will use miniconda’s python distribution, which includes a package manager.\nGo to https://docs.conda.io/en/latest/miniconda.html to download the installer of your choice (listed under Linux). At the time of this writing the latest installer includes Python 3.10, and put it inside your ~/Downloads folder, which is accessible from windows using the above-mentioned explorer.exe . command.\nPlace your downloaded file in this directory.\n\n\n\n\n\n\nCopying files from Windows to WSL\n\n\n\n\n\nWhen you copy a file from Windows to a Linux directory in WSL, Windows may add a Zone.Identifier file to the directory containing the copied file. This is because Windows considers the Linux directory to be a network location, and adds the file to provide security information for the copied file.\nThe Zone.Identifier file is used by Windows to help protect against the execution of potentially harmful files that may have been downloaded from the internet or copied from an untrusted source. When a file is opened, Windows checks the Zone.Identifier file to determine if the file is safe to execute.\nThis may prevent you from installing the file you just downloaded. In this case, simply delete the Zone.Identifier file.\n\n\n\nMake the script executable:\n\nchmod +x your_conda_installer.sh\n\nAnd run the bash script:\n\n./your_conda_installer.sh\n\nFollow the prompts, say yes to all. Quit WSL and start again so it recognizes the path to conda.\nYou’re done! Check your conda version using conda --version."
+  },
+  {
+    "objectID": "tidbits/003_WSL/WSL.html#install-wsl",
+    "href": "tidbits/003_WSL/WSL.html#install-wsl",
+    "title": "Setting up a minimal data-science environment in Windows using WSL (part I)",
+    "section": "",
+    "text": "Install WSL: Open a powershell as administrator and run\n\nwsl --install\n\nCheck the installation and version with\n\nwsl -l -v\n\nTo activate the Bash shell type\n\nwsl\n\nTo exit the shell type\n\nexit\n\nYou can now use Bash to run linux tools and applications. During the installation process, make note of your login and password.\n\n\nYour home directory is accessed using cd ~. Create a Downloads directory and navigate to it:\n\ncd ~\nmkdir Downloads\ncd Downloads\n\nYou can use explorer.exe . to open File Explorer from the current directory."
+  },
+  {
+    "objectID": "tidbits/003_WSL/WSL.html#update-the-linux-distribution",
+    "href": "tidbits/003_WSL/WSL.html#update-the-linux-distribution",
+    "title": "Setting up a minimal data-science environment in Windows using WSL (part I)",
+    "section": "",
+    "text": "Run the following code to update the linux distribution you just installed and make sur it is up-to-date:\n\nsudo apt update\nsudo apt upgrade"
+  },
+  {
+    "objectID": "tidbits/003_WSL/WSL.html#install-python-3",
+    "href": "tidbits/003_WSL/WSL.html#install-python-3",
+    "title": "Setting up a minimal data-science environment in Windows using WSL (part I)",
+    "section": "",
+    "text": "Python comes pre-installed in WSL. Check the version:\n\npython3 --version\n\nIf somehow it is not installed, you can install it by running\n\nsudo apt install python3"
+  },
+  {
+    "objectID": "tidbits/003_WSL/WSL.html#install-miniconda",
+    "href": "tidbits/003_WSL/WSL.html#install-miniconda",
+    "title": "Setting up a minimal data-science environment in Windows using WSL (part I)",
+    "section": "",
+    "text": "Even though WSL comes with python 3 pre-installed, we will use miniconda’s python distribution, which includes a package manager.\nGo to https://docs.conda.io/en/latest/miniconda.html to download the installer of your choice (listed under Linux). At the time of this writing the latest installer includes Python 3.10, and put it inside your ~/Downloads folder, which is accessible from windows using the above-mentioned explorer.exe . command.\nPlace your downloaded file in this directory.\n\n\n\n\n\n\nCopying files from Windows to WSL\n\n\n\n\n\nWhen you copy a file from Windows to a Linux directory in WSL, Windows may add a Zone.Identifier file to the directory containing the copied file. This is because Windows considers the Linux directory to be a network location, and adds the file to provide security information for the copied file.\nThe Zone.Identifier file is used by Windows to help protect against the execution of potentially harmful files that may have been downloaded from the internet or copied from an untrusted source. When a file is opened, Windows checks the Zone.Identifier file to determine if the file is safe to execute.\nThis may prevent you from installing the file you just downloaded. In this case, simply delete the Zone.Identifier file.\n\n\n\nMake the script executable:\n\nchmod +x your_conda_installer.sh\n\nAnd run the bash script:\n\n./your_conda_installer.sh\n\nFollow the prompts, say yes to all. Quit WSL and start again so it recognizes the path to conda.\nYou’re done! Check your conda version using conda --version."
+  },
+  {
     "objectID": "tidbits.html",
     "href": "tidbits.html",
     "title": "Tidbits",
     "section": "",
-    "text": "I use this page to post small code snippets, helpers, howtos or hacks.\n\n\n\n\n\n\n\n\n  \n\n\n\n\nConnecting to Strava using oanth2\n\n\n\n\n\n\n\n\n\n\n \n\n\n\n\nNo matching items"
+    "text": "I use this page to post small code snippets, helpers, howtos or hacks.\n\n\n\n\n\n\n\n\n  \n\n\n\n\nConnecting to Strava using oanth2\n\n\n\n\n\n\n\n\n\n\n \n\n\n\n\n  \n\n\n\n\nRNN state space models\n\n\n\n\n\n\n\n\n\n\n \n\n\n\n\n  \n\n\n\n\nSetting up a minimal data-science environment in Windows using WSL (part II)\n\n\n\n\n\n\n\ncode\n\n\nlinux\n\n\nsetup\n\n\n\n\n\n\n\n\n\n \n\n\n\n\n  \n\n\n\n\nSetting up a minimal data-science environment in Windows using WSL (part I)\n\n\n\n\n\n\n\ncode\n\n\nlinux\n\n\nsetup\n\n\n\n\n\n\n\n\n\n \n\n\n\n\nNo matching items"
   }
 ]

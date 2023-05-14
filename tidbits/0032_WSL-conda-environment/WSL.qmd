@@ -1,0 +1,86 @@
+---
+title: Setting up a minimal data-science environment in Windows using WSL (part II)
+eval: false 
+categories: [code, linux, setup]
+---
+
+# Set up a conda environment for data-science
+
+Now that we have conda installed, let us set up a conda environment called `ds` (for data-science). Open WSL, then run
+
+
+```{python}
+conda create -n ds 
+```
+
+Activate the environment:
+
+```{python}
+conda activate ds
+```
+
+When you now run `python3`, it will launch the version of the python interpreter that came with anaconda (in the previous step), not the version that comes pre-installed with WSL.
+
+You can now install the following basic data-science packages:
+
+
+```{python}
+conda install numpy scipy matplotlib seaborn scikit-learn pandas Jupyter
+```
+
+
+::: {.callout-tip}
+### Installing packages through conda forge
+Conda official repository only feature a few verified packages. A vast portion of python packages that are otherwise available through pip are installed through community led channel called conda-forge. You can visit their site to learn more about it.
+To do this, install your other packages `package1` and `package2` (say), by specifying the `conda-forge` channel :
+
+```{python}
+conda install -c conda-forge package1 package2
+```
+:::
+
+### Test your installation:
+
+We now test the installation by using the following workflow:
+
+* Create a python script using the **Windows** text editor of your choice, save it in your `~/Downloads` folder. 
+* Execute the script from Bash.
+
+Create a new file called `test.py` in `~/Downloads` with the following content:
+
+```{python}
+import seaborn as sns
+import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
+from scipy import stats
+
+# Generate some random data
+np.random.seed(42)
+x = np.random.normal(size=100)
+y = np.random.normal(size=100)
+
+# Create a DataFrame from the data
+df = pd.DataFrame({'x': x, 'y': y})
+
+# Plot a scatter plot using Seaborn
+sns.scatterplot(data=df, x='x', y='y')
+
+# Add a regression line using SciPy
+slope, intercept, r_value, p_value, std_err = stats.linregress(x, y)
+plt.plot(x, slope * x + intercept, color='red')
+
+# Set the x and y labels using Matplotlib
+plt.xlabel('X')
+plt.ylabel('Y')
+
+# Show the plot
+plt.show()
+```
+
+and run it with 
+
+
+```{python}
+python3 ~/Downloads/test.py
+```

@@ -1,0 +1,116 @@
+---
+title: Setting up a minimal data-science environment in Windows using WSL (part I)
+eval: false 
+categories: [code, linux, setup]
+---
+
+# Install Conda in WSL
+This is the first part of a series of tidbits to set up a data-science environement in linux alongside windows, using windows subsystem for linux (WSL).
+
+This will include conda as a package / environment manager, using the minimal version miniconda, and the following data-science packages installed for the default interpreter.
+
+* numpy
+* scipy
+* scikit-learn
+* matplotlib
+* seaborn
+* pandas
+* Jupyter
+
+For deep learning packages, this comes next.
+
+## Install WSL
+Install WSL: Open a powershell as administrator and run
+
+```{python}
+wsl --install
+```
+
+Check the installation and version with
+
+```{python}
+wsl -l -v
+```
+
+To activate the Bash shell type
+
+```{python}
+wsl
+```
+
+To exit the shell type
+
+```{python}
+exit
+```
+
+You can now use Bash to run linux tools and applications. During the installation process, make note of your *login* and *password*. 
+
+### Accessing your folders and setting things up
+
+Your `home` directory is accessed  using `cd ~`. Create a `Downloads` directory and navigate to it:
+
+```{python}
+cd ~
+mkdir Downloads
+cd Downloads
+```
+
+
+You can use `explorer.exe .` to open File Explorer from the current directory.
+
+## Update the Linux distribution
+Run the following code to update the linux distribution you just installed and make sur it is up-to-date:
+
+```{python}
+sudo apt update
+sudo apt upgrade
+```
+
+
+## Install python 3
+Python comes pre-installed in WSL. Check the version:
+
+```{python}
+python3 --version
+```
+
+If somehow it is not installed, you can install it by running
+
+```{python}
+sudo apt install python3
+```
+
+
+## Install miniconda
+
+Even though WSL comes with python 3 pre-installed, we will use miniconda's python distribution, which includes a package manager. 
+
+Go to [https://docs.conda.io/en/latest/miniconda.html](https://docs.conda.io/en/latest/miniconda.html) to download the installer of your choice (listed under Linux). At the time of this writing the latest installer includes Python 3.10, and put it inside your `~/Downloads` folder, which is accessible from windows using the above-mentioned `explorer.exe .` command.
+
+Place your downloaded file in this directory.
+
+::: {.callout-caution collapse="true"}
+### Copying files from Windows to WSL
+When you copy a file from Windows to a Linux directory in WSL, Windows may add a `Zone.Identifier` file to the directory containing the copied file. This is because Windows considers the Linux directory to be a network location, and adds the file to provide security information for the copied file.
+
+The `Zone.Identifier` file is used by Windows to help protect against the execution of potentially harmful files that may have been downloaded from the internet or copied from an untrusted source. When a file is opened, Windows checks the `Zone.Identifier` file to determine if the file is safe to execute.
+
+This may prevent you from installing the file you just downloaded. In this case, simply delete the `Zone.Identifier` file.
+:::
+
+Make the script executable:
+
+```{python}
+chmod +x your_conda_installer.sh
+```
+
+And run the bash script:
+
+```{python}
+./your_conda_installer.sh
+```
+
+Follow the prompts, say `yes` to all. Quit WSL and start again so it recognizes the path to conda.
+
+You're done! Check your conda version using `conda --version`.
